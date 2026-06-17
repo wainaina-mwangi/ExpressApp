@@ -1,12 +1,15 @@
 import express from "express";
-const port = process.env.port || 8000;
+const port = process.env.PORT || 8000;
 const app = express();
-import cookieParser from "cookie-parser";
+import cookieParser from 'cookie-parser';
 import cors from "cors";
 import "dotenv/config";
+import connectDB from "./config/db.js";
+
+connectDB();
 
 app.use(cors({ Credentials: true }));
-app.use(cookie - parser());
+app.use(cookieParser());
 app.use(express.json());
 
 app.get("/", (req, res) => {
