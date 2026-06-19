@@ -8,20 +8,21 @@ import connectDB from "./config/db.js";
 
 connectDB();
 
+// import the auth router
+import authRouter from './routes/authRoutes.js';
+
 app.use(cors({ Credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 
+
+// api endpoints
 app.get("/", (req, res) => {
   res.send("Api is working");
 });
+app.use("/api/auth", authRouter);
 
-// app.get("/api/plan/:planName", (req, res) => {
 
-//     const { planName } = req.params;
-
-//     res.send(`You are viewing details for the ${planName} internet speed bundle.`);
-// });
 
 app.listen(port, () => {
   console.log(`app runs on http://localhost:${port} `);
