@@ -1,5 +1,5 @@
 import express from "express";
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 6000;
 const app = express();
 import cookieParser from 'cookie-parser';
 import cors from "cors";
