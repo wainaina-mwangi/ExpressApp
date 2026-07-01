@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import userModel from "../models/userModel.js";
+import transporter from "../config/nodeMailer.js";
 
 
 
@@ -33,6 +34,18 @@ export const register = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    // -----------SCRIPT TO SEND AN EMAIL USING NODEMAILER----
+    const mailOPtions ={
+      from:process.env.SENDER_EMAIL,
+      to: email,
+      subject:"welcome to MERN",
+      text:`welcome to Mern your account has been created with email id:${email}`
+    }
+
+    await transporter.sendMail(mailOPtions)
+
+    // -----------SCRIPT TO SEND AN EMAIL USING NODEMAILER----
 
      res.json({ success: true });
   } catch (error) {
