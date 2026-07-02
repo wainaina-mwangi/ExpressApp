@@ -118,7 +118,7 @@ export const login = async (req, res) => {
 
 
 
-//  otp
+//  otp generation function
 
 export const sendVerifyOtp= async (req,res)=>{
  try {
@@ -145,9 +145,32 @@ export const sendVerifyOtp= async (req,res)=>{
 
     await transporter.sendMail(mailOPtions);
 
-    res.json({succes:true,messsage:"otp sent successfully"});
+    res.json({succes:true, messsage:"otp sent successfully"});
 
  } catch (error) {
-  res.json({success:false,message:error.message});
+  res.json({success:false, message:error.message});
  }
 };
+
+
+
+
+
+export const verifyEmail = async (req,res) =>{
+  const{userId,otp} = req.body;
+
+  if(!userId || !otp){
+    res.json({succes:false, messsage:"missing details"});
+  }
+
+  try {
+    const user = await userModel.findById(userId);
+  if(!user){
+     res.json({succes:false, messsage:"user not found"});
+  }
+
+  } catch (error) {
+     res.json({success:false, message:error.message});
+  }
+
+}
