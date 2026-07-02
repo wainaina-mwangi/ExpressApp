@@ -129,9 +129,25 @@ export const sendVerifyOtp= async (req,res)=>{
     return res.json({success:false,message:"user account verified"});
    }
  
-   const otp =  String(Math.floor(100000 + Math.random() * 900000) )
+   const otp =  String(Math.floor(100000 + Math.random() * 900000));
+
+   user.verifyOtp = otp;
+   user.verifyOtpExpiredAt = Date.now() + 24 * 60 * 60 * 1000
+
+   await user.save();
+
+    const mailOPtions ={
+      from:process.env.SENDER_EMAIL,
+      to: user.email,
+      subject:"Account verification OTP",
+      text:`Your &{otp}. verify your account using this otp `
+    }
+
+    await transporter.sendMail(mailOPtions);
+
+    res.json({succes:true,messsage:"otp sent successfully"});
 
  } catch (error) {
   res.json({success:false,message:error.message});
  }
-}
+};
