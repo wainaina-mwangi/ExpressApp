@@ -20,8 +20,8 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res.json({ success: false, message: "user already exists" });
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
 
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new userModel({ name, email, password: hashedPassword });
     await user.save();
 
@@ -35,21 +35,24 @@ export const register = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // -----------SCRIPT TO SEND AN EMAIL USING NODEMAILER----
-    const mailOPtions ={
-      from:process.env.SENDER_EMAIL,
-      to: email,
-      subject:"welcome to MERN",
-      text:`welcome to Mern your account has been created with email id:${email}`
+    // respond to the client now — signup is already done and safe
+    res.json({ success: true });
+
+    // fire the welcome email after responding; failures here
+    // must never affect the response already sent
+    try {
+      await transporter.sendMail({
+        from: process.env.SENDER_EMAIL,
+        to: email,
+        subject: "welcome to MERN",
+        text: `welcome to Mern your account has been created with email id:${email}`,
+      });
+    } catch (mailError) {
+      console.error("Welcome email failed for", email, mailError.message);
+      // nothing else to do — user is registered either way
     }
-
-    await transporter.sendMail(mailOPtions)
-
-    // -----------SCRIPT TO SEND AN EMAIL USING NODEMAILER----
-
-     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    return res.json({ success: false, message: error.message });
   }
 };
 
@@ -90,7 +93,7 @@ export const login = async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+  return  res.json({ success: false, message: error.message });
   }
 };
 
@@ -110,7 +113,7 @@ export const login = async (req, res) => {
 
       return res.json({success:true,message:"logged out"});
     } catch (error) {
-      res.json({success:false,message:error.message});
+    return  res.json({success:false,message:error.message});
     }
  };
 
@@ -120,57 +123,72 @@ export const login = async (req, res) => {
 
 //  otp generation function
 
-export const sendVerifyOtp= async (req,res)=>{
- try {
-   const {userId} = req.body;
-   const user = await userModel.findById(userId);
+export const sendVerifyOtp = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await userModel.findById(userId);
 
-   if(user.isAccountVerified){
-    return res.json({success:false,message:"user account verified"});
-   }
- 
-   const otp =  String(Math.floor(100000 + Math.random() * 900000));
-
-   user.verifyOtp = otp;
-   user.verifyOtpExpiredAt = Date.now() + 24 * 60 * 60 * 1000
-
-   await user.save();
-
-    const mailOPtions ={
-      from:process.env.SENDER_EMAIL,
-      to: user.email,
-      subject:"Account verification OTP",
-      text:`Your &{otp}. verify your account using this otp `
+    if (!user) {
+      return res.json({ success: false, message: "user not found" });
     }
 
-    await transporter.sendMail(mailOPtions);
+    if (user.isAccountVerified) {
+      return res.json({ success: false, message: "user account verified" });
+    }
 
-    res.json({succes:true, messsage:"otp sent successfully"});
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    user.verifyOtp = otp;
+    user.verifyOtpExpiredAt = Date.now() + 24 * 60 * 60 * 1000;
+    await user.save();
 
- } catch (error) {
-  res.json({success:false, message:error.message});
- }
+    const mailOptions = {
+      from: process.env.SENDER_EMAIL,
+      to: user.email,
+      subject: "Account verification OTP",
+      text: `Your ${otp}. verify your account using this otp `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.json({ success: true, message: "otp sent successfully" });
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
+  }
 };
 
 
 
 
 
-export const verifyEmail = async (req,res) =>{
-  const{userId,otp} = req.body;
+export const verifyEmail = async (req, res) => {
+  const { userId, otp } = req.body;
 
-  if(!userId || !otp){
-    res.json({succes:false, messsage:"missing details"});
+  if (!userId || !otp) {
+    return res.json({ success: false, message: "missing details" });
   }
 
   try {
     const user = await userModel.findById(userId);
-  if(!user){
-     res.json({succes:false, messsage:"user not found"});
-  }
+    if (!user) {
+      return res.json({ success: false, message: "user not found" });
+    }
 
+    if (user.verifyOtp === "" || user.verifyOtp !== otp) {
+      return res.json({ success: false, message: "invalid OTP" });
+    }
+
+    if (user.verifyOtpExpiredAt < Date.now()) {
+      return res.json({ success: false, message: "OTP expired" });
+    }
+
+    user.isAccountVerified = true;
+    user.verifyOtp = "";
+    user.verifyOtpExpiredAt = 0;
+    await user.save();
+
+    return res.json({ success: true, message: "email verified successfully" });
   } catch (error) {
-     res.json({success:false, message:error.message});
+    return res.json({ success: false, message: error.message });
   }
+};
 
-}
