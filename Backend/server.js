@@ -11,6 +11,7 @@ connectDB();
 
 // import the auth router
 import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
 
 app.use(cors({ credentials: true }));
 app.use(cookieParser());
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
   res.send("Api is working");
 });
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 
 
 
