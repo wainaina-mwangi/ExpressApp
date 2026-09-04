@@ -17,7 +17,7 @@ const Header = () => {
         welcome to our app
       </h2>
       <p className="mb-2">hey good to see you now lets get you started</p>
-      <button className="border border-grey-500 px-8 py-3 rounded-full mb-4">
+      <button className="border border-grey-500 px-8 py-3 rounded-2xl mb-4">
         Get Started
       </button>
     </div>
