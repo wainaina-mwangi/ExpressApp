@@ -1,12 +1,19 @@
 import React from "react";
 import { useState } from "react";
 import { assets } from "../assets/assets";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
+
   const [state, setstate] = useState("signUp");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   return (
     <div className="flex bg-gradient-to-br from-blue-200 to-purple-400 items-center justify-center min-h-screen px-6 sm:px-0 bg-slate-950 font-sans">
       <img
+        onClick={() => navigate("/")}
         src={assets.logo}
         alt="Logo"
         className="absolute left-5 top-5 w-28 sm:left-20 sm:w-32 cursor-pointer"
@@ -32,6 +39,8 @@ const Login = () => {
               <input
                 type="text"
                 placeholder="Full Name"
+                onChange={(e) => setName(e.target.value)}
+                value={name}
                 required
                 className="bg-transparent outline-none flex-1 text-white placeholder:text-slate-500"
               />
@@ -47,6 +56,8 @@ const Login = () => {
             <input
               type="email"
               placeholder="Email Address"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
               required
               className="bg-transparent outline-none flex-1 text-white placeholder:text-slate-500"
             />
@@ -57,11 +68,15 @@ const Login = () => {
             <input
               type="password"
               placeholder="Password"
+              onChange={(e) => setPassword(e.target.value)}
+              value={password}
               required
               className="bg-transparent outline-none flex-1 text-white placeholder:text-slate-500"
             />
           </div>
-
+          <p className="text-indigo-500 mb-4 cursor-pointer" onClick={()=>navigate('/resetpassword')}>
+            Forgot Password?
+          </p>
           <button
             type="submit"
             className="w-full bg-indigo-600 text-white font-semibold py-4 rounded-full text-base hover:bg-indigo-700 transition-colors shadow-lg active:scale-[0.98]"
